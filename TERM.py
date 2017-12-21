@@ -13,4 +13,5 @@ class TERM:
 		self.representation = representation
 		self.name = name
 
-	def 
+	def __str__(self):
+		return '--TERM-- \nName: %s \nRepresentation: %s' %(self.name,self.representation)

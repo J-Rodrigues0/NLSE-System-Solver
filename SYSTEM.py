@@ -13,3 +13,5 @@ class SYSTEM:
 
 	def add_equation(self,equation):
 		self.equations[self.n_eqs] = equation
+
+	
