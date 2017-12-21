@@ -5,16 +5,14 @@ Defines the class EQUATION which will be used as an object in the system of NLSE
 '''
 
 import numpy as np
-import pylab as pl
-import matplotlib.pyplot as plt
 
 class EQUATION:
-	def __init__(self,ground_state = None,name = None):
+	def __init__(self,name = '',ground_state = None):
 		self.n_terms = 0
 		self.terms = {}
 		self.name = name
-		self.L = None #Part to be solved in the momentum representation
-		self.N = None #Part to be solved in the position representation
+		self.L = [] #Part to be solved in the momentum representation
+		self.N = [] #Part to be solved in the position representation
 		self.solution = ground_state
 
 	def __str__(self):
@@ -27,64 +25,42 @@ class EQUATION:
 		self.terms[self.n_terms] = term  
 		self.n_terms += 1
 
-	def parts(self):
+	def parts(self): #Updates the L and N parts of the equation
+		momentum_matrix = []
+		position_matrix = []
 		for i in self.terms:
 			term = self.terms[i]
+			if term.time_variant:
+				term.matrix = term.function(**term.variables).astype(np.float64)
 			if term.representation == 'Momentum':
-				if self.L == None:
-					self.L = term.matrix
+				if momentum_matrix == []:
+					momentum_matrix = term.matrix
 				else:
-					self.L += term.matrix
+					momentum_matrix += term.matrix
 			else:
-				if self.N == None:
-					self.N = term.matrix
+				if position_matrix == []:
+					position_matrix = term.matrix
 				else:
-					self.N += term.matrix
+					position_matrix += term.matrix
+		self.L = momentum_matrix
+		self.N = position_matrix
 
-	def solve(self,X,Y,dt,N_stride,N_steps):
-		self.parts()
+	def step(self,dt):
+		psi = self.solution
 
-		psi0 = self.solution
-		psi = psi0
+		#Half step in L
 		psi = np.fft.fft2(psi)
 		psi = np.exp(0.5j*self.L*dt)*psi
 
-		t = 0
-		for n in range(N_stride):
-			print(n)
-			#Iteration through full steps
-			for m in range(N_steps):
-				t += dt
-				psi = np.fft.ifft2(psi)
-				
-				psi = np.exp(1.j*self.N*dt)*psi
+		#Full step in N
+		psi = np.fft.ifft2(psi)
+		psi = np.exp(1.j*self.N*dt)*psi
 
-				psi = np.fft.fft2(psi)
-				psi = np.exp(1.j*self.L*dt)*psi
+		#Half step in L
+		psi = np.fft.fft2(psi)
+		psi = np.exp(0.5j*self.L*dt)*psi
 
-			#Last full step in N
-			psi = np.fft.ifft2(psi)
-			psi = np.exp(1.j*self.N*dt)*psi
+		psi = np.fft.ifft2(psi)
 
-			#Last half step in L
-			psi = np.fft.fft2(psi)
-			psi = np.exp(0.5j*self.L*dt)*psi
-
-			psi = np.fft.ifft2(psi)
-
-			prob = np.abs(psi)**2
-
-			#Make the bonecade
-			pl.figure()
-			pl.contour(X,Y,self.N.real,10)
-			pl.contourf(X,Y,prob)
-			pl.colorbar()
-			plt.savefig('/home/joaorodrigues/Desktop/MCE/Final/figs/%s.png' %n,dpi=200)
-			pl.close()
-
-			#Continue the run
-			psi = np.fft.fft2(psi)
-			psi = np.exp(0.5j*self.L*dt)*psi
-
-			self.solution = psi
+		self.solution = psi
 

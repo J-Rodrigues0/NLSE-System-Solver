@@ -8,10 +8,15 @@ The TERM has an optional name, a defining matrix and the representation in which
 '''
 
 class TERM:
-	def __init__(self,matrix,representation,name = None):
+	def __init__(self,matrix,representation,name = '',time_variant = False,**kwargs):
 		self.matrix = matrix
 		self.representation = representation
 		self.name = name
+		self.time_variant = time_variant
+
+		if time_variant:			
+			self.function = kwargs['Function']
+			self.variables = kwargs['Variables']
 
 	def __str__(self):
 		return '--TERM-- \nName: %s \nRepresentation: %s' %(self.name,self.representation)
