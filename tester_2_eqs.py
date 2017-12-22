@@ -19,10 +19,10 @@ def V(x,y,V0,R0):
 	return V_
 
 def psi_0(X,Y):
-	return np.exp(-(((X-0.2)**2 + (Y-0.1)**2)/0.1**2)**4)*np.exp(1.j*100.*X)
+	return np.exp(-(((X-0.2)**2 + (Y-0.)**2)/0.1**2)**4)*np.exp(1.j*100.*X)
 
 def psi_1(X,Y):
-	return np.exp(-(((X+0.2)**2 + (Y+0.1)**2)/0.1**2)**4)*np.exp(-1.j*100.*X)
+	return np.exp(-(((X+0.2)**2 + (Y+0.)**2)/0.1**2)**4)*np.exp(-1.j*100.*X)
 
 #Initializing system and equation
 system = SYSTEM()
@@ -32,7 +32,7 @@ eq2 = EQUATION('eq2')
 system.add_equation(eq1) #Adding equation to the system
 system.add_equation(eq2) #Adding equation to the system
 
-Z = 6
+Z = 8
 N = 2**Z
 
 L = 1.
@@ -55,11 +55,11 @@ term1 = TERM(0.5*K2,'Momentum','P_squared')
 eq1.add_term(term1)
 eq2.add_term(term1)
 
-term2 = TERM(V(X,Y,V0,R0),'Position','Potential')
+term2 = TERM(V(X,Y,V0,R0),'Position','Binding Potential')
 eq1.add_term(term2)
 eq2.add_term(term2)
-"""
-f = lambda eq: eq.solution
+
+f = lambda eq: np.abs(eq.solution)**2
 kwargs1 = {'Function': f,'Variables':{'eq':eq2}}
 kwargs2 = {'Function': f,'Variables':{'eq':eq1}}
 
@@ -67,7 +67,7 @@ term3 = TERM(eq1.solution,'Position','Cross Term',True,**kwargs2)
 term4 = TERM(eq2.solution,'Position','Cross Term',True,**kwargs1)
 eq1.add_term(term4)
 eq2.add_term(term3)
-"""
+
 #Initializing solutions
 eq1.solution = psi_0(X,Y)
 eq2.solution = psi_1(X,Y)

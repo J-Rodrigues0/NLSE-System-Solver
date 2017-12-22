@@ -10,30 +10,30 @@ import matplotlib.pyplot as plt
 
 class SYSTEM:
 	def __init__(self,name=None):
-		self.name = name
-		self.n_eqs = 0
-		self.equations = {}
+		self.name = name #Name of the system (optional)
+		self.n_eqs = 0 #Number of equations in the system
+		self.equations = {} #Dictionary of equations in the system
 
-	def add_equation(self,equation):
+	def add_equation(self,equation): #Adds an equation to the system
 		self.equations[self.n_eqs] = equation
 		self.n_eqs += 1
 
-	def solve(self,X,Y,dt,N_stride,N_steps):
+	def solve(self,X,Y,dt,N_stride,N_steps): #Solves the system using the SSSFM
 		t = 0
-		for n in range(N_stride):
+		for n in range(N_stride): #Iterate through the number of strides in the run
 			print('Stride nº: %s' %n)
-			for m in range(N_steps):
+			for m in range(N_steps): #Perform N_steps of the run
 				t += dt
-				for i in self.equations:
-					self.equations[i].parts()
-					self.equations[i].step(dt)
+				for i in self.equations: #Perform one step of each equation
+					self.equations[i].parts() #Update terms (L and N - and, eventually, V)
+					self.equations[i].step(dt) #Do one step
 
-			for i in self.equations:
-				prob = np.abs(self.equations[i].solution)**2
+			for i in self.equations: #Build figures
+				prob = np.abs(self.equations[i].solution)**2 #Probability density of the solution
 
-				#Make the graph and save it
 				pl.figure()
-				pl.contour(X,Y,self.equations[i].N.real,10)
+				if self.equations[i].V != []:
+					pl.contour(X,Y,self.equations[i].V.real,10)
 				pl.contourf(X,Y,prob)
 				pl.colorbar()
 				plt.savefig('/home/joaorodrigues/Desktop/MCE/Final/figs/%s.png' %(self.equations[i].name+'_'+str(n)),dpi=200)
