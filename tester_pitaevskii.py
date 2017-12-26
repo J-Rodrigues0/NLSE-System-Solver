@@ -23,11 +23,11 @@ def psi_0(X,Y):
 
 #Initializing system and equation
 system = SYSTEM()
-eq1 = EQUATION()
+eq1 = EQUATION('eq1')
 
 system.add_equation(eq1) #Adding equation to the system
 
-Z = 6
+Z = 8
 N = 2**Z
 
 L = 1.
@@ -51,6 +51,12 @@ eq1.add_term(term1)
 
 term2 = TERM(V(X,Y,V0,R0),'Position','Binding Potential')
 eq1.add_term(term2)
+
+f = lambda eq: np.abs(eq.solution)**2
+kwargs = {'Function': f,'Variables':{'eq':eq1}}
+
+term3 = TERM(eq1.solution,'Position','Psi squared',True,**kwargs)
+eq1.add_term(term3)
 
 eq1.solution = psi_0(X,Y)
 system.solve(X,Y,dt,N_stride,N_steps)
