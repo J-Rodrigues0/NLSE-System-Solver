@@ -20,6 +20,10 @@ class SYSTEM:
 
 	def solve(self,X,Y,dt,N_stride,N_steps): #Solves the system using the SSSFM
 		t = 0
+		sum_squared = {}
+		for i in self.equations:
+			sum_squared[i] = np.sum(np.abs(self.equations[i].solution)**2)
+
 		for n in range(N_stride): #Iterate through the number of strides in the run
 			print('Stride nº: %s' %n)
 			for m in range(N_steps): #Perform N_steps of the run
@@ -27,6 +31,10 @@ class SYSTEM:
 				for i in self.equations: #Perform one step of each equation
 					self.equations[i].parts() #Update terms (L and N - and, eventually, V)
 					self.equations[i].step(dt) #Do one step
+
+					total_prob = np.sum(np.abs(self.equations[i].solution)**2)/sum_squared[i]
+					if not 1. - total_prob < 1e-5:
+						raise ValueError('Total Probability != 1 : %s' %float(total_prob))
 
 			for i in self.equations: #Build figures
 				prob = np.abs(self.equations[i].solution)**2 #Probability density of the solution

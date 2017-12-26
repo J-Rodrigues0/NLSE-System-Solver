@@ -1,6 +1,7 @@
 '''
 
-Tests the solver for a single Schrodinger equation of the type H psi = E psi with H = P²/2 + V
+Tests the solver for two Schrodinger equations of the type: P²/2 psi + V psi + abs(psi)² psi + abs(phi)² psi = 0
+															P²/2 phi + V phi + abs(phi)² phi + abs(psi)² phi = 0
 
 '''
 
@@ -51,22 +52,34 @@ dt = 1e-4
 N_stride = 100
 N_steps = 100
 
+#Kinetic Energy Term
 term1 = TERM(0.5*K2,'Momentum','P_squared')
 eq1.add_term(term1)
 eq2.add_term(term1)
 
+#Binding Potential Term
 term2 = TERM(V(X,Y,V0,R0),'Position','Binding Potential')
 eq1.add_term(term2)
 eq2.add_term(term2)
 
+#Gross-Pitaevskii Term
 f = lambda eq: np.abs(eq.solution)**2
-kwargs1 = {'Function': f,'Variables':{'eq':eq2}}
-kwargs2 = {'Function': f,'Variables':{'eq':eq1}}
+kwargs1 = {'Function': f,'Variables':{'eq':eq1}} #(eq1.solution)² for eq1
+kwargs2 = {'Function': f,'Variables':{'eq':eq2}} #(eq2.solution)² for eq2
 
-term3 = TERM(eq1.solution,'Position','Cross Term',True,**kwargs2)
-term4 = TERM(eq2.solution,'Position','Cross Term',True,**kwargs1)
-eq1.add_term(term4)
-eq2.add_term(term3)
+term3_1 = TERM(eq1.solution,'Position','Gross-Pitaevskii Term',True,**kwargs1)
+term3_2 = TERM(eq2.solution,'Position','Gross-Pitaevskii Term',True,**kwargs2)
+eq1.add_term(term3_1)
+eq2.add_term(term3_2)
+
+#Cross Potential Term
+kwargs1 = {'Function': f,'Variables':{'eq':eq2}} #(eq2.solution)² for eq1
+kwargs2 = {'Function': f,'Variables':{'eq':eq1}} #(eq1.solution)² for eq2
+
+term4_1 = TERM(eq1.solution,'Position','Cross Term',True,**kwargs1)
+term4_2 = TERM(eq2.solution,'Position','Cross Term',True,**kwargs2)
+eq1.add_term(term4_1)
+eq2.add_term(term4_2)
 
 #Initializing solutions
 eq1.solution = psi_0(X,Y)

@@ -66,4 +66,3 @@ class EQUATION:
 		psi = np.fft.ifft2(psi)
 
 		self.solution = psi
-
