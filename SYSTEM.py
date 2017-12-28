@@ -41,6 +41,7 @@ class SYSTEM:
 
 				pl.figure()
 				if self.equations[i].V != []:
+					#print(np.average(self.equations[i].V.real))
 					pl.contour(X,Y,self.equations[i].V.real,10)
 				pl.contourf(X,Y,prob)
 				pl.colorbar()
