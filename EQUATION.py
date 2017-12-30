@@ -35,12 +35,12 @@ class EQUATION:
 				term.matrix = term.function(**term.variables).astype(np.float64)
 			if term.representation == 'Momentum':
 				if momentum_matrix == []:
-					momentum_matrix = term.matrix
+					momentum_matrix = np.copy(term.matrix)
 				else:
 					momentum_matrix += term.matrix
 			else:
 				if position_matrix == []:
-					position_matrix = term.matrix
+					position_matrix = np.copy(term.matrix)
 				else:
 					position_matrix += term.matrix
 				if term.name == 'Binding Potential': #If there is a binding potential to represent in the figures
@@ -57,7 +57,7 @@ class EQUATION:
 
 		#Full step in N
 		psi = np.fft.ifft2(psi)
-		psi = np.exp(1.j*self.N*dt)*psi
+		psi = np.exp(1.0j*self.N*dt)*psi
 
 		#Half step in L
 		psi = np.fft.fft2(psi)
