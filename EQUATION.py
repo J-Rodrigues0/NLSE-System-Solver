@@ -26,13 +26,16 @@ class EQUATION:
 		self.terms[self.n_terms] = term  
 		self.n_terms += 1
 
-	def parts(self): #Updates the L and N parts of the equation
+	def parts(self,dt): #Updates the L and N parts of the equation
 		momentum_matrix = [] #Matrix with the momentum representation parts
 		position_matrix = [] #Matrix with the position representation parts
 		for i in self.terms: #Iterate through the terms
 			term = self.terms[i]
+			if term.time_derivative: #If the term is to be integrated in time
+				term.matrix += dt*term.function(**term.variables)
+				continue
 			if term.time_variant: #If term is time variant, recalculate its value
-				term.matrix = term.function(**term.variables).astype(np.float64)
+				term.matrix = term.function(**term.variables)
 			if term.representation == 'Momentum':
 				if momentum_matrix == []:
 					momentum_matrix = np.copy(term.matrix)
@@ -40,9 +43,9 @@ class EQUATION:
 					momentum_matrix += term.matrix
 			else:
 				if position_matrix == []:
-					position_matrix = np.copy(term.matrix)
+					position_matrix = np.copy(term.matrix).astype(np.complex128)
 				else:
-					position_matrix += term.matrix
+					position_matrix += term.matrix.astype(np.complex128)
 				if term.name == 'Binding Potential': #If there is a binding potential to represent in the figures
 					self.V = term.matrix
 		self.L = momentum_matrix
@@ -64,5 +67,10 @@ class EQUATION:
 		psi = np.exp(0.5j*self.L*dt)*psi
 
 		psi = np.fft.ifft2(psi)
+
+		for i in self.terms:
+			term = self.terms[i]
+			if term.time_derivative and not term.auxiliary:
+				psi += term.matrix
 
 		self.solution = psi

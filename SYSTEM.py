@@ -29,19 +29,20 @@ class SYSTEM:
 			for m in range(N_steps): #Perform N_steps of the run
 				t += dt
 				for i in self.equations: #Perform one step of each equation
-					self.equations[i].parts() #Update terms (L and N - and, eventually, V)
+					self.equations[i].parts(dt) #Update terms (L and N - and, eventually, V)
 					self.equations[i].step(dt) #Do one step
 
+
+
 					total_prob = np.sum(np.abs(self.equations[i].solution)**2)/sum_squared[i]
-					if not 1. - total_prob < 1e-5:
-						raise ValueError('Total Probability != 1 : %s' %float(total_prob))
+					#if not 1. - total_prob < 1e-5:
+						#raise ValueError('Total Probability != 1 : %s' %float(total_prob))
 
 			for i in self.equations: #Build figures
 				prob = np.abs(self.equations[i].solution)**2 #Probability density of the solution
 
 				pl.figure()
 				if self.equations[i].V != []:
-					#print(np.average(self.equations[i].V.real))
 					pl.contour(X,Y,self.equations[i].V.real,10)
 				pl.contourf(X,Y,prob)
 				pl.colorbar()

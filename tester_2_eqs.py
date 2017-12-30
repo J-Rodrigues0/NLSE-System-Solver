@@ -20,11 +20,11 @@ def V(x,y,V0,R0):
 	return V_
 
 def psi_0(X,Y):
-	return np.exp(-(((X-0.2)**2 + (Y-0.2)**2)/0.1**2))*np.exp(1.j*10.*X)
+	return np.exp(-(((X-0.4)**2 + (Y-0.2)**2)/0.1**2)**4)*np.exp(-1.j*10.*X)
 
 
 def psi_1(X,Y):
-	return np.exp(-(((X+0.2)**2 + (Y+0.2)**2)/0.1**2))*np.exp(-1.j*10.*X)
+	return -np.exp(-(((X+0.4)**2 + (Y+0.2)**2)/0.1**2)**4)*np.exp(+1.j*10.*X)
 
 #Initializing system and equation
 system = SYSTEM()
@@ -34,7 +34,7 @@ eq2 = EQUATION('eq2')
 system.add_equation(eq1) #Adding equation to the system
 system.add_equation(eq2) #Adding equation to the system
 
-Z = 6
+Z = 8
 N = 2**Z
 
 L = 1.
@@ -48,7 +48,7 @@ k_x, k_y = np.meshgrid(k_line,k_line)
 K2 = k_x**2 + k_y**2
 
 V0 = 1e10
-R0 = 0.5
+R0 = 0.8
 
 dt = 1e-4
 N_stride = 100
@@ -59,10 +59,12 @@ term1 = TERM(0.5*K2,'Momentum','P_squared')
 eq1.add_term(term1)
 eq2.add_term(term1)
 
+
 #Binding Potential Term
 term2 = TERM(V(X,Y,V0,R0),'Position','Binding Potential')
 eq1.add_term(term2)
 eq2.add_term(term2)
+
 
 #Gross-Pitaevskii Term
 f = lambda eq: np.abs(eq.solution)**2
