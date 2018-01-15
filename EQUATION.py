@@ -15,6 +15,8 @@ class EQUATION:
 		self.N = [] #Part to be solved in the position representation
 		self.V = [] #Binding potential of the equation
 		self.solution = ground_state #Solution of the equation
+		self.inside = [] #Percentage of the solution inside an area
+		self.outside = [] #Outside that area
 
 	def __str__(self): #String conversion
 		terms_str = '\n'
@@ -74,3 +76,12 @@ class EQUATION:
 				psi += term.matrix
 
 		self.solution = psi
+
+	def reflections(self,area):
+		#Computes the percentage of the solution inside an area
+		index = np.where(area == 1)
+		total = np.sum(np.abs(self.solution)**2)
+		inside = np.sum(np.abs(self.solution[index])**2)/total*100
+		outside = 100-inside
+		self.inside.append(inside)
+		self.outside.append(outside)

@@ -18,16 +18,22 @@ def V(x,y,V0,R0):
 	V_[index] = 0
 	return V_
 
+def V_barrier(x,y,V0,R0):
+	V_ = np.zeros((len(x),len(y)))
+	index = np.where(np.abs(x) < R0)
+	V_[index] = V0
+	return V_
+
 def psi_0(X,Y):
-	return np.exp(-(((X-0.2)**2 + (Y-0.1)**2)/0.1**2)**4)*np.exp(1.j*100.*X)
+	return np.exp(-(((X+0.3)**2 + Y**2)/0.1**2))*np.exp(-1.j*10000.*X)
 
 #Initializing system and equation
 system = SYSTEM()
-eq1 = EQUATION()
+eq1 = EQUATION('eq1')
 
 system.add_equation(eq1) #Adding equation to the system
 
-Z = 6
+Z = 8
 N = 2**Z
 
 L = 1.
@@ -39,18 +45,21 @@ k_line = np.fft.fftfreq(N,dh)
 k_x, k_y = np.meshgrid(k_line,k_line)
 K2 = k_x**2 + k_y**2
 
-V0 = 1e10
-R0 = 0.4
+V0 = 4e2
+R0 = 0.005
 
 dt = 1e-4
 N_stride = 100
-N_steps = 100
+N_steps = 10
 
 term1 = TERM(0.5*K2,'Momentum','P_squared')
 eq1.add_term(term1)
 
-term2 = TERM(V(X,Y,V0,R0),'Position','Binding Potential')
+V_ = V_barrier(X,Y,V0,R0)
+term2 = TERM(V_,'Position','Binding Potential')
 eq1.add_term(term2)
 
 eq1.solution = psi_0(X,Y)
+system.area = np.zeros([N,N])
+system.area[0:N//2,:] += 1
 system.solve(X,Y,dt,N_stride,N_steps)

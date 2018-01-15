@@ -22,7 +22,7 @@ def V_harmonic(x,y):
 	return x**2/2
 
 def psi_0(X,Y):
-	return np.exp(-(((X-0.)**2 + (Y-0.)**2)/0.1**2))*np.exp(1.j*0.*X)
+	return np.exp(-(((X-0.)**2 + (Y-0.)**2)/0.1**2))*np.exp(1.j*100.*X)
 
 def Dx(sigma,dh):
 	return 0.5*dh*(np.roll(sigma,1,axis=0) - np.roll(sigma,-1,axis=0))
@@ -32,17 +32,17 @@ def Dy(sigma,dh):
 
 def sigma_x(x,y):
 	sig_x = np.zeros((len(x),len(y)))
-	index = np.where(x >= 0.9)
-	sig_x[index] = -1e10
+	index = np.where(abs(x) >= 0.9)
+	sig_x[index] = 10*x[index]**2
 	return sig_x
 
 def sigma_y(x,y):
 	sig_y = np.zeros((len(x),len(y)))
-	index = np.where(y >= 0.9)
-	sig_y[index] = -1e10
+	index = np.where(abs(y) >= 0.9)
+	sig_y[index] = 10*y[index]**2
 	return sig_y
 
-Z = 6
+Z = 8
 N = 2**Z
 
 L = 1.
@@ -55,7 +55,7 @@ k_line = np.fft.fftfreq(N,dh)
 k_x, k_y = np.meshgrid(k_line,k_line)
 K2 = k_x**2 + k_y**2
 
-V0 = 1e10
+V0 = 1e5
 R0 = 0.4
 
 dt = 1e-4
@@ -86,6 +86,9 @@ sig_y = sigma_y(X,Y)
 dx_sig_x = Dx(sig_x,dh)
 dy_sig_y = Dy(sig_y,dh)
 
+print(sig_x)
+print(sig_y)
+
 term4_0 = TERM(0.5j*(sig_x + sig_y),'Position','NTD1')
 eq1.add_term(term4_0)
 
@@ -93,7 +96,6 @@ term4_1 = TERM(-0.25*sig_y*dx_sig_x*k_x + -0.25*sig_x*dy_sig_y*k_y,'Momentum','N
 eq1.add_term(term4_1)
 
 #Time derivative terms (TD)
-
 phi0 = lambda eq: 0.25j*sig_x*sig_y*eq.solution
 kwargs0 = {'Function':phi0,'Variables':{'eq':eq1}}
 term5_0 = TERM(phi0(eq1),'Position','Phi0',False,True,**kwargs0)
@@ -101,6 +103,7 @@ eq1.add_term(term5_0)
 
 #Terms in V
 V_ = V(X,Y,V0,R0)
+"""
 phi1 = lambda eq: 0.5*(sig_x + sig_y)*V_*eq.solution
 kwargs1 = {'Function':phi1,'Variables':{'eq':eq1}}
 term5_1 = TERM(phi1(eq1),'Position','Phi1',False,True,**kwargs1)
@@ -115,7 +118,7 @@ phi3 = lambda: term5_2.matrix
 kwargs3 = {'Function':phi3,'Variables':{}}
 term5_3 = TERM(phi3(),'Position','Phi3',False,True,**kwargs3)
 eq1.add_term(term5_3)
-
+"""
 #Terms in psi²
 phi4 = lambda eq: 0.5*(sig_x + sig_y)*np.abs(eq.solution)**2*eq.solution
 kwargs4 = {'Function':phi4,'Variables':{'eq':eq1}}
