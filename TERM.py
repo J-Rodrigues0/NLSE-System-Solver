@@ -23,4 +23,4 @@ class TERM:
 
 
 	def __str__(self): #String conversion
-		return '--TERM-- \nName: %s \nRepresentation: %s' %(self.name,self.representation)
+		return '--TERM-- \nName: %s \nRepresentation: %s\n' %(self.name,self.representation)

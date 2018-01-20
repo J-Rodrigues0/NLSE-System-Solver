@@ -58,6 +58,8 @@ class SYSTEM:
 					pl.figure()
 					pl.plot(times,inside,label='Reflected')
 					pl.plot(times,outside,label='Transmitted')
+					pl.xlabel('Time (s)')
+					pl.ylabel('Coefficient (%)')
 					pl.legend()
 					plt.savefig('/home/joaorodrigues/Desktop/MCE/Final/figs/%s.png' %(eq.name+'_reflections'),dpi=200)
 					pl.close()

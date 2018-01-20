@@ -20,11 +20,11 @@ def V(x,y,V0,R0):
 	return V_
 
 def psi_0(X,Y):
-	return np.exp(-(((X-0.3)**2 + (Y-0.)**2)/0.05**2))*np.exp(-1.j*100.*X)
+	return np.exp(-(((X-0.3)**2 + (Y-0.05)**2)/0.1**2))*np.exp(1.j*10000.*X)
 
 
 def psi_1(X,Y):
-	return np.exp(-(((X+0.3)**2 + (Y+0.)**2)/0.05**2))*np.exp(1.j*100.*X)
+	return np.exp(-(((X+0.3)**2 + (Y+0.05)**2)/0.1**2))*np.exp(-1.j*10000.*X)
 
 #Initializing system and equation
 system = SYSTEM()
@@ -43,7 +43,6 @@ dh = 2.*L/(N-1)
 X, Y = np.mgrid[-L:L+dh:dh,-L:L+dh:dh]
 
 k_line = np.fft.fftfreq(N,dh)
-k_line = np.fft.fftshift(k_line)
 k_x, k_y = np.meshgrid(k_line,k_line)
 K2 = k_x**2 + k_y**2
 
@@ -51,8 +50,8 @@ V0 = 1e10
 R0 = 0.8
 
 dt = 1e-4
-N_stride = 1000
-N_steps = 100
+N_stride = 100
+N_steps = 10
 
 #Kinetic Energy Term
 term1 = TERM(0.5*K2,'Momentum','P_squared')
@@ -67,20 +66,24 @@ eq2.add_term(term2)
 
 
 #Gross-Pitaevskii Term
-f = lambda eq: np.abs(eq.solution)**2
+f = lambda eq,g: g*np.abs(eq.solution)**2
 
-kwargs1 = {'Function': f,'Variables':{'eq':eq1}} #(eq1.solution)² for eq1
-kwargs2 = {'Function': f,'Variables':{'eq':eq2}} #(eq2.solution)² for eq2
+g = 1
+kwargs1 = {'Function': f,'Variables':{'eq':eq1,'g':g}} #(eq1.solution)² for eq1
+kwargs2 = {'Function': f,'Variables':{'eq':eq2,'g':g}} #(eq2.solution)² for eq2
 
-term3_1 = TERM(0,'Position','Gross-Pitaevskii Term',True,**kwargs1)
-term3_2 = TERM(0,'Position','Gross-Pitaevskii Term',True,**kwargs2)
+term3_1 = TERM(eq1.solution,'Position','Gross-Pitaevskii Term',True,**kwargs1)
+term3_2 = TERM(eq2.solution,'Position','Gross-Pitaevskii Term',True,**kwargs2)
 eq1.add_term(term3_1)
 eq2.add_term(term3_2)
 
 #Cross Potential Term
+g = 1e3
+kwargs1 = {'Function': f,'Variables':{'eq':eq1,'g':g}} #(eq1.solution)² for eq1
+kwargs2 = {'Function': f,'Variables':{'eq':eq2,'g':g}} #(eq2.solution)² for eq2
 
-term4_1 = TERM(0,'Position','Cross Term',True,**kwargs2) #(eq2.solution)² for eq1
-term4_2 = TERM(0,'Position','Cross Term',True,**kwargs1) #(eq1.solution)² for eq2
+term4_1 = TERM(eq1.solution,'Position','Binding Potential',True,**kwargs2) #(eq2.solution)² for eq1
+term4_2 = TERM(eq2.solution,'Position','Binding Potential',True,**kwargs1) #(eq1.solution)² for eq2
 eq1.add_term(term4_1)
 eq2.add_term(term4_2)
 

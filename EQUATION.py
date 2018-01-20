@@ -22,7 +22,7 @@ class EQUATION:
 		terms_str = '\n'
 		for i in self.terms:
 			terms_str += str(self.terms[i]) + '\n'
-		return '--EQUATION-- \nName: %s \nNº of Terms: %s \nTerms: %s' %(self.name,self.n_terms,terms_str)
+		return '--EQUATION-- \nName: %s \nNº of Terms: %s \nTerms: %s\n' %(self.name,self.n_terms,terms_str)
 
 	def add_term(self,term): #Adds a term to the equation
 		self.terms[self.n_terms] = term  
